@@ -1,0 +1,115 @@
+# History files
+.Rhistory
+
+# Example code in package build process
+*-Ex.R
+
+#*****************************************************
+#                                                    *
+#  Leung, Lisa  301110726                            *
+#  Stat 340, Spring 2013                             *
+#  Assignment 6, Part 1                              *
+#                                                    *
+#*****************************************************
+
+setwd("C:/Users/Serena/stat340")
+getwd()
+rm(list=ls())
+cereals <- read.table("cereal.txt", fill=TRUE,  as.is=TRUE,
+                      col.names=c("name", "mfr", "type", "calories", "protein", "fat",
+                                  "sodium", "fiber", "carbo", "sugars","shelf",
+                                  "potass", "vitamins", "weight","cups"))
+str(cereals)
+dim(cereals)
+print(cereals[1:10,])
+cereals[1:10,]
+#cereals$potass[cereals$potass==-1]<-NA
+cereals[cereals==-1]<-NA
+any(cereals == -1, na.rm=TRUE)
+print(cereals[1:10,])
+cereals$calories<-as.numeric(cereals$calories)
+cereals$protein<-as.numeric(cereals$protein)
+cereals$fat<-as.numeric(cereals$fat)
+cereals$carbo<-as.numeric(cereals$carbo)
+cereals$sugars<-as.numeric(cereals$sugars)
+cereals$sodium<-as.numeric(cereals$sodium)
+cereals$vitamins<-as.numeric(cereals$vitamins)
+
+pairs(~calories+protein+fat+carbo+sugars+sodium+vitamins, data=cereals, main="") 
+title(main="Scatterplot on the Seven Variables")
+
+my.fit <- lm( calories ~ fat, data=cereals)
+summary(my.fit)
+
+my.fit.r2 <- summary(my.fit)$r.squared
+print(my.fit.r2)
+
+str(summary(my.fit))
+
+my.fit.coeff<-summary(my.fit)$coefficients
+print(my.fit.coeff)
+confidence<-confint(my.fit)
+my.fit.se<-sqrt(diag(vcov(my.fit)))
+
+my.table <- cbind(my.fit.coeff, my.fit.se, confidence)
+my.table<-round(my.table,2)
+print(my.table)
+
+anova(my.fit)
+
+my.fit.resid<-resid(my.fit)
+my.fit.fitted<-fitted(my.fit)
+my.fit.resid
+
+plot(my.fit.fitted, my.fit.resid)
+title ("Residual plot")
+abline(h=0)
+
+str(my.fit$fit)
+str(cereals$calories)
+
+plot(my.fit.fitted, cereals$calories[is.na(cereals$calories)==FALSE])
+abline(a=0, b=1)
+
+par(mfrow=c(2,1))
+
+hist(my.fit.resid, prob=TRUE)
+lines(density(my.fit.resid))
+
+hist(my.fit.resid, prob=FALSE)
+lines(density(my.fit.resid))
+
+qqnorm(my.fit.resid)
+
+layout(matrix(1:4, nrow=2, ncol=2))
+plot(my.fit)
+help(layout)
+
+layout(matrix(1:1, nrow=1, ncol=1)) # turn off previous layout
+plot(cereals$fat, cereals$calories)
+abline(my.fit)
+my.fit.mean <- predict(my.fit, se.fit=TRUE, interval="confidence")
+str(my.fit.mean)
+print(my.fit.mean)
+
+my.fit.mean$fit[1:5,]
+matlines(cereals$fat[order(cereals$fat[is.na(cereals$calories)==FALSE])],
+         my.fit.mean$fit[order(cereals$fat[is.na(cereals$calories)==FALSE]),c("lwr","upr")], col="red", lty=1)
+
+
+my.fit.indiv <- predict(my.fit, se.fit=TRUE, interval="prediction")
+str(my.fit.indiv)
+my.fit.indiv$fit[1:5,]
+matlines(cereals$fat[order(cereals$fat[is.na(cereals$calories)==FALSE])],
+         my.fit.indiv$fit[order(cereals$fat[is.na(cereals$calories)==FALSE]),c("lwr","upr")], col="blue", lty=2)
+
+my.fit.at4.mean <- predict(my.fit, newdata=data.frame(fat=c(4)),
+                           se.fit=TRUE, interval="confidence")
+print(my.fit.at4.mean)
+my.fit.at4.indiv <- predict(my.fit, newdata=data.frame(fat=c(4)), 
+                            se.fit=TRUE, interval="prediction")
+print(my.fit.at4.indiv)
+
+tapply(cereals, cereals)
+
+str(cereals$shelf)
